@@ -39,6 +39,7 @@ jobs:
         run: |
          sudo apt-get install -y python3-wstool
          echo ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}
+         echo ${{ros-workspace-directory-name}}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
 #    steps:
