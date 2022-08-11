@@ -2,6 +2,9 @@
 
 name: CI
 
+on:
+   workflow_dispatch:
+
 # Controls when the workflow will run
 #on:
 #   Triggers the workflow on push or pull request events but only for the "ci-tests-workflow" branch
@@ -10,20 +13,11 @@ name: CI
 #  pull_request:
 #    branches: [ "ci-tests-workflow" ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
-#jobs:
-  # This workflow contains a single job called "build"
-#  build:
-    # The type of runner that the job will run on
-#    runs-on: ubuntu-latest
-
-on:
-   workflow_dispatch:
-  
 jobs:
   build:
     runs-on: ubuntu-20.04
-#    env:
+    env:
+      ROS_DISTRO: noetic
 #      ROS_CI_DESKTOP: "`lsb_release -cs`"  # e.g. [trusty|xenial|...]
 #      CI_SOURCE_PATH: $(pwd)
 #      ROSINSTALL_FILE: $CI_SOURCE_PATH/dependencies.rosinstall
@@ -32,7 +26,7 @@ jobs:
 #      # Set the python path manually to include /usr/-/python3/dist-packages
 #      # as this is where apt-get installs python packages.
 #      PYTHONPATH: $PYTHONPATH:/usr/lib/python3/dist-packages:/usr/local/lib/python3/dist-packages
-#      ROS_DISTRO: noetic
+       
 
     steps:
       - uses: ros-tooling/setup-ros@v0.3
@@ -41,6 +35,11 @@ jobs:
       - uses: ros-tooling/action-ros-ci@v0.2
         with:
           target-ros1-distro: noetic
+      - name: Install CRAM dependencies
+        run: |
+            sudo apt-get install -y python3-catkin-tools \
+            python3-catkin-pkg \
+            python3-rosdep python3-wstool
 
     # Steps represent a sequence of tasks that will be executed as part of the job
 #    steps:
