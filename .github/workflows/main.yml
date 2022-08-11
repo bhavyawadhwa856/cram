@@ -37,9 +37,8 @@ jobs:
           target-ros1-distro: noetic
       - name: Install CRAM dependencies
         run: |
-            sudo apt-get install -y python3-catkin-tools \
-            python3-catkin-pkg \
-            python3-rosdep python3-wstool
+         sudo apt-get install -y python3-wstool
+         echo ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
 #    steps:
