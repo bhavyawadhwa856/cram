@@ -27,7 +27,6 @@ jobs:
 #      # as this is where apt-get installs python packages.
 #      PYTHONPATH: $PYTHONPATH:/usr/lib/python3/dist-packages:/usr/local/lib/python3/dist-packages
        
-
     steps:
       - uses: ros-tooling/setup-ros@v0.3
         with:
@@ -37,20 +36,19 @@ jobs:
           target-ros1-distro: noetic
       - name: Install CRAM dependencies
         run: |
-         sudo apt-get install -y python3-wstool
-         echo ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-#    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-#      - uses: actions/checkout@v3
-
-      # Runs a single command using the runners shell
-#      - name: Run a one-line script
-#        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-#      - name: Run a multi-line script
-#        run: |
-#          echo Add other actions to build,
-#          echo test, and deploy your project.
+          sudo apt-get install -y python3-wstool
+          export WS_PATH=${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}
+          echo "Workspace path: $WS_PATH"
+          echo "CI source path: $CI_SOURCE_PATH"
+          echo "Current path: $(pwd)"
+          cd $WS_PATH
+          source devel/setup.bash
+          cd src
+          wstool init
+          wstool merge ./cram/cram-20.04.rosinstall
+          wstool update
+          cd ..
+          catkin_make
+          source devel/setup.bash
+          echo "Cram Tests location: $(rospack find cram_tests)"
+          rosrun cram_tests test.sh
