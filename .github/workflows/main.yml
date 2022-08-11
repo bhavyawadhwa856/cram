@@ -37,11 +37,11 @@ jobs:
     steps:
       - uses: ros-tooling/setup-ros@v0.3
         with:
-          required-ros-distributions: humble
+          required-ros-distributions: noetic
       - uses: ros-tooling/action-ros-ci@v0.2
         with:
-          package-name: my_package
-          target-ros2-distro: humble
+          package-name: cram
+          target-ros2-distro: noetic
 
     # Steps represent a sequence of tasks that will be executed as part of the job
 #    steps:
