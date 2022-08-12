@@ -36,7 +36,7 @@ jobs:
           target-ros1-distro: noetic
       - run: |
           sudo apt-get install -y python3-wstool
-          echo "WS directory: ${{ ros-workspace-directory-name }}"
+          echo "WS directory: ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}"
 #          wstool init
 #          wstool merge ${{ ros-workspace-directory-name }}/cram/cram-20.04.rosinstall
 #          wstool rm cram
