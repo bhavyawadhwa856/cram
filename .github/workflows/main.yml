@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-20.04
     
     env:
-      ROS_DISTRO: noetic
+      ROS_DISTRO: noetic # only useful in run-sections
        
     steps:
-      - name: Build ROS $ROS_DISTRO
+      - name: Build ROS
         uses: ros-tooling/setup-ros@v0.3
         with:
-          required-ros-distributions: $ROS_DISTRO
+          required-ros-distributions: noetic
           
       - name: Install CRAM rosdeps and build workspace
         uses: ros-tooling/action-ros-ci@v0.2
@@ -37,7 +37,7 @@ jobs:
         uses: ros-tooling/action-ros-ci@v0.2
         with:
           target-ros1-distro: noetic
-          vcs-repo-file-url: .rosinstall
+          vcs-repo-file-url: ./.rosinstall
           
       - name: Execute CRAM Tests
         run: |
