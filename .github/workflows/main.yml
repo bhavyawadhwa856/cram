@@ -31,9 +31,9 @@ jobs:
       - uses: ros-tooling/setup-ros@v0.3
         with:
           required-ros-distributions: noetic
-#       - uses: ros-tooling/action-ros-ci@v0.2
-#         with:
-#           target-ros1-distro: noetic
+      - uses: ros-tooling/action-ros-ci@v0.2
+        with:
+          target-ros1-distro: noetic
       - run: |
           sudo apt-get install -y python3-wstool
           echo "WS directory: ${{ ros-workspace-directory-name }}"
