@@ -34,21 +34,31 @@ jobs:
       - uses: ros-tooling/action-ros-ci@v0.2
         with:
           target-ros1-distro: noetic
-      - name: Install CRAM dependencies
-        run: |
+      - run: |
           sudo apt-get install -y python3-wstool
-          export WS_PATH=${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}
-          echo "Workspace path: $WS_PATH"
-          echo "CI source path: $CI_SOURCE_PATH"
-          echo "Current path: $(pwd)"
-          cd $WS_PATH
-          source devel/setup.bash
-          cd src
+          cd ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}/..
           wstool init
-          wstool merge ./cram/cram-20.04.rosinstall
-          wstool update
-          cd ..
-          catkin_make
-          source devel/setup.bash
-          echo "Cram Tests location: $(rospack find cram_tests)"
-          rosrun cram_tests test.sh
+          wstool merge ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}/cram/cram-20.04.rosinstall
+          wstool rm cram
+          cd ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}
+      - uses: ros-tooling/action-ros-ci@v0.2
+        with:
+          target-ros1-distro: noetic
+          vcs-repo-file-url: ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}/../.rosinstall
+#      - name: Install CRAM dependencies
+#        run: |
+#          sudo apt-get install -y python3-wstool
+#          export WS_PATH=${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}
+#          echo "Workspace path: $WS_PATH"
+#          echo "CI source path: $CI_SOURCE_PATH"
+#          echo "Current path: $(pwd)"
+#          source devel/setup.bash
+#          cd src
+#          wstool init
+#          wstool merge ./cram/cram-20.04.rosinstall
+#          wstool update
+#          cd ..
+#          catkin_make
+#          source devel/setup.bash
+#          echo "Cram Tests location: $(rospack find cram_tests)"
+#          rosrun cram_tests test.sh
