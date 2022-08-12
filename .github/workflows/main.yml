@@ -5,49 +5,48 @@ name: CI
 on:
    workflow_dispatch:
 
-# Controls when the workflow will run
-#on:
-#   Triggers the workflow on push or pull request events but only for the "ci-tests-workflow" branch
-#  push:
-#    branches: [ "ci-tests-workflow" ]
-#  pull_request:
-#    branches: [ "ci-tests-workflow" ]
-
 jobs:
   build:
     runs-on: ubuntu-20.04
+    
     env:
       ROS_DISTRO: noetic
-#      ROS_CI_DESKTOP: "`lsb_release -cs`"  # e.g. [trusty|xenial|...]
-#      CI_SOURCE_PATH: $(pwd)
-#      ROSINSTALL_FILE: $CI_SOURCE_PATH/dependencies.rosinstall
-#      CATKIN_OPTIONS: $CI_SOURCE_PATH/catkin.options
-#      ROS_PARALLEL_JOBS: '-j8 -l6'
-#      # Set the python path manually to include /usr/-/python3/dist-packages
-#      # as this is where apt-get installs python packages.
-#      PYTHONPATH: $PYTHONPATH:/usr/lib/python3/dist-packages:/usr/local/lib/python3/dist-packages
        
     steps:
+      # Build ROS noetic
       - uses: ros-tooling/setup-ros@v0.3
         with:
-          required-ros-distributions: noetic
+          name: Build ROS $ROS_DISTRO
+          required-ros-distributions: $ROS_DISTRO
+      # Install package deps and build workspace
       - uses: ros-tooling/action-ros-ci@v0.2
         with:
+          name: Install CRAM rosdeps and build workspace
           target-ros1-distro: noetic
-      - run: |
+      # Install rosinstall deps    
+      - name: Create rosinstall file
+        run: |
           sudo apt-get install -y python3-wstool
           echo "WS directory: $(pwd)"
-          ls -la | echo
+          ls -la
+          echo $(ls)
           wstool init
-          wstool merge ./cram/cram-20.04.rosinstall
+          wstool merge ./cram-20.04.rosinstall
           wstool rm cram
-#       - uses: ros-tooling/action-ros-ci@v0.2
-#         with:
-#           target-ros1-distro: noetic
-#           vcs-repo-file-url: ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}/.rosinstall
-#      - name: Install CRAM dependencies
-#        run: |
-#          sudo apt-get install -y python3-wstool
+      - uses: ros-tooling/action-ros-ci@v0.2
+        with:
+          name: Pull rosinstall repositories
+          target-ros1-distro: noetic
+          vcs-repo-file-url: .rosinstall
+      - name: Execute CRAM Tests
+        run: |
+          pwd
+          echo $(pwd)
+          ls
+          echo $(ls)
+          echo "Let's try some tests now."
+          /usr/bin/sbcl --non-interactive --eval "(print \"Hello\")"
+#          /usr/bin/sbcl --non-interactive --eval "(progn (load (parse-namestring (concatenate 'string (sb-ext:posix-getenv \"ROS_ROOT\") \"lisp/scripts/roslisp-sbcl-init\"))) (asdf:load-system :cram-pr2-pick-place-demo))" --quit
 #          export WS_PATH=${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}
 #          echo "Workspace path: $WS_PATH"
 #          echo "CI source path: $CI_SOURCE_PATH"
