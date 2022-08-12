@@ -13,17 +13,16 @@ jobs:
       ROS_DISTRO: noetic
        
     steps:
-      # Build ROS noetic
-      - uses: ros-tooling/setup-ros@v0.3
+      - name: Build ROS $ROS_DISTRO
+        uses: ros-tooling/setup-ros@v0.3
         with:
-          name: Build ROS $ROS_DISTRO
           required-ros-distributions: $ROS_DISTRO
-      # Install package deps and build workspace
-      - uses: ros-tooling/action-ros-ci@v0.2
+          
+      - name: Install CRAM rosdeps and build workspace
+        uses: ros-tooling/action-ros-ci@v0.2
         with:
-          name: Install CRAM rosdeps and build workspace
           target-ros1-distro: noetic
-      # Install rosinstall deps    
+          
       - name: Create rosinstall file
         run: |
           sudo apt-get install -y python3-wstool
@@ -33,11 +32,13 @@ jobs:
           wstool init
           wstool merge ./cram-20.04.rosinstall
           wstool rm cram
-      - uses: ros-tooling/action-ros-ci@v0.2
+          
+      - name: Pull rosinstall repositories
+        uses: ros-tooling/action-ros-ci@v0.2
         with:
-          name: Pull rosinstall repositories
           target-ros1-distro: noetic
           vcs-repo-file-url: .rosinstall
+          
       - name: Execute CRAM Tests
         run: |
           pwd
