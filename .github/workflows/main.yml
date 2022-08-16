@@ -26,13 +26,16 @@ jobs:
       - name: Create rosinstall file
         run: |
           sudo apt-get install -y python3-wstool tree
-          tree
-          echo "WS directory: $(pwd)"
-          ls -la
+          # tree # ros_ws
+          # echo "WS directory: $(pwd)" # /home/runner/work/cram/cram - below is ros_ws
+          # ls -la # ros.key and ros_ws/
           echo $(ls)
           cd ros_ws/src
           wstool init
-          wstool merge ./cram/cram-20.04.rosinstall
+          echo "GITHUB WORKSPACE: "
+          echo ${{ GITHUB_WORKSPACE }}
+          echo $GITHUB_WORKSPACE
+          wstool merge ${{ GITHUB_WORKSPACE }}/cram-20.04.rosinstall
           wstool rm cram
           cp .rosinstall /tmp/deps.repos
           
