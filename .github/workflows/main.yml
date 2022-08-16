@@ -11,6 +11,7 @@ jobs:
     
     env:
       ROS_DISTRO: noetic # only useful in run-sections
+      ROSINSTALL_FILE: https://raw.githubusercontent.com/cram2/cram/devel/cram-20.04.rosinstall
        
     steps:
       - name: Build ROS
@@ -34,7 +35,8 @@ jobs:
           wstool init
           echo "GITHUB WORKSPACE: "
           echo $GITHUB_WORKSPACE
-          wstool merge $GITHUB_WORKSPACE/ros_ws/src/cram/cram-20.04.rosinstall
+          tree -L 4
+          wstool merge $ROSINSTALL_FILE
           wstool rm cram
           cp .rosinstall /tmp/deps.repos
           
