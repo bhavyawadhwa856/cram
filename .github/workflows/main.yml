@@ -34,7 +34,7 @@ jobs:
           wstool init
           echo "GITHUB WORKSPACE: "
           echo $GITHUB_WORKSPACE
-          wstool merge $GITHUB_WORKSPACE/cram-20.04.rosinstall
+          wstool merge $GITHUB_WORKSPACE/ros_ws/src/cram-20.04.rosinstall
           wstool rm cram
           cp .rosinstall /tmp/deps.repos
           
