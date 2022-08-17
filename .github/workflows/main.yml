@@ -11,7 +11,7 @@ jobs:
     
     env:
       ROS_DISTRO: noetic # only useful in run-sections
-      ROSINSTALL_FILE: https://raw.githubusercontent.com/cram2/cram/devel/cram-20.04.rosinstall
+      ROSINSTALL_FILE: https://raw.githubusercontent.com/cram2/cram/devel/cram-20.04-http.rosinstall
        
     steps:
       - name: Build ROS
