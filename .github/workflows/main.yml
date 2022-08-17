@@ -23,7 +23,7 @@ jobs:
         uses: ros-tooling/action-ros-ci@v0.2
         with:
           target-ros1-distro: noetic
-          vcs-repo-file-url: ${{ ROSINSTALL_FILE }}
+          vcs-repo-file-url: https://raw.githubusercontent.com/cram2/cram/devel/cram-20.04-http.rosinstall
           
 #       - name: Create rosinstall file
 #         run: |
