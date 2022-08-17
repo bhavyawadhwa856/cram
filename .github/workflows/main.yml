@@ -44,7 +44,7 @@ jobs:
           
       - name: Execute CRAM Tests
         run: |
-          sudo apt-get install -y ros-$ROS_DISTRO-rosbash ros-$ROS_DISTRO-launch
+          sudo apt-get install -y ros-$ROS_DISTRO-rosbash ros-$ROS_DISTRO-roslaunch
           echo "---BEGIN TESTS---"
           # /usr/bin/sbcl --non-interactive --eval "(print \"Hello\")"
           rosrun cram_tests test.sh
