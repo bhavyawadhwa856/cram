@@ -23,7 +23,7 @@ jobs:
         uses: ros-tooling/action-ros-ci@v0.2
         with:
           target-ros1-distro: noetic
-          vcs-repo-file-url: https://raw.githubusercontent.com/cram2/cram/devel/cram-20.04-http.rosinstall
+          vcs-repo-file-url: ${{ env.ROSINSTALL_FILE }}
           
 #       - name: Create rosinstall file
 #         run: |
@@ -44,10 +44,21 @@ jobs:
           
       - name: Execute CRAM Tests
         run: |
-          sudo apt-get install -y ros-$ROS_DISTRO-rosbash ros-$ROS_DISTRO-roslaunch
+          pwd
+          tree -L 4
+          cd $GITHUB_WORKSPACE
+          tree -L 4
+          echo "GITHUB WORKSPACE: "
+          echo $GITHUB_WORKSPACE       
+          source $GITHUB_WORKSPACE/ros_ws/devel/setup.bash
           echo "---BEGIN TESTS---"
-          # /usr/bin/sbcl --non-interactive --eval "(print \"Hello\")"
+          # /usr/bin/sbcl --non-interactive --eval "(print \"Hello\")"          
           rosrun cram_tests test.sh
+
+
+
+# ---
+
 #          /usr/bin/sbcl --non-interactive --eval "(progn (load (parse-namestring (concatenate 'string (sb-ext:posix-getenv \"ROS_ROOT\") \"lisp/scripts/roslisp-sbcl-init\"))) (asdf:load-system :cram-pr2-pick-place-demo))" --quit
 #          export WS_PATH=${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}
 #          echo "Workspace path: $WS_PATH"
