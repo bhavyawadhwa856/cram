@@ -45,14 +45,21 @@ jobs:
       - name: Execute CRAM Tests
         run: |
           pwd
-          tree -L 2
+          echo "Runner tree:"
+          tree -L 4 ../../
           cd $GITHUB_WORKSPACE
-          tree -L 2
+          echo "Workspace tree:"
+          tree -L 3
           echo "GITHUB WORKSPACE: "
           echo $GITHUB_WORKSPACE
+          echo "ROS PACKAGE PATH:"
+          echo $ROS_PACKAGE_PATH
+          echo "CMAKE_PREFIX_PATH:"
+          echo $CMAKE_PREFIX_PATH
+          source /opt/ros/noetic/setup.bash
           echo $(rospack find cram_tests)
           echo "upper repo:"
-          ls -la $(rospack find cram_tests)/../../../../
+          ls -la $(rospack find cram_tests)/../../../../ # rospack not found
           echo "src:"
           ls -la $(rospack find cram_tests)/../../../
           source $(rospack find cram_tests)/../../../../devel/setup.bash
