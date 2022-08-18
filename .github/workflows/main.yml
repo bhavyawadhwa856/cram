@@ -21,6 +21,7 @@ jobs:
       - run: "source /opt/ros/noetic/setup.bash && rosnode --help"
       - uses: ros-tooling/action-ros-ci@v0.2
         with:
+          package-name: cram_tests cram_pr2_pick_place_demo
           target-ros1-distro: noetic
           vcs-repo-file-url: ${{ env.ROSINSTALL_FILE }}
       - run: |
