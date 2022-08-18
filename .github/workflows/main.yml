@@ -45,12 +45,18 @@ jobs:
       - name: Execute CRAM Tests
         run: |
           pwd
-          tree -L 4
+          tree -L 2
           cd $GITHUB_WORKSPACE
-          tree -L 4
+          tree -L 2
           echo "GITHUB WORKSPACE: "
-          echo $GITHUB_WORKSPACE       
-          source $GITHUB_WORKSPACE/ros_ws/devel/setup.bash
+          echo $GITHUB_WORKSPACE
+          echo $(rospack find cram_tests)
+          echo "upper repo:"
+          ls -la $(rospack find cram_tests)/../../../../
+          echo "src:"
+          ls -la $(rospack find cram_tests)/../../../
+          source $(rospack find cram_tests)/../../../../devel/setup.bash
+          # source $GITHUB_WORKSPACE/ros_ws/devel/setup.bash
           echo "---BEGIN TESTS---"
           # /usr/bin/sbcl --non-interactive --eval "(print \"Hello\")"          
           rosrun cram_tests test.sh
