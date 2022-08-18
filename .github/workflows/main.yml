@@ -18,32 +18,12 @@ jobs:
         uses: ros-tooling/setup-ros@v0.3
         with:
           required-ros-distributions: noetic
-          
-      - name: Install CRAM rosdeps and build workspace
-        uses: ros-tooling/action-ros-ci@v0.2
+      - run: "source /opt/ros/noetic/setup.bash && rosnode --help"
+      - uses: ros-tooling/action-ros-ci@v0.2
         with:
           target-ros1-distro: noetic
           vcs-repo-file-url: ${{ env.ROSINSTALL_FILE }}
-          
-#       - name: Create rosinstall file
-#         run: |
-#           sudo apt-get install -y python3-wstool tree
-#           cd ros_ws/src
-#           wstool init
-#           # echo "GITHUB WORKSPACE: "
-#           # echo $GITHUB_WORKSPACE
-#           wstool merge $ROSINSTALL_FILE
-#           wstool rm cram
-#           cp .rosinstall /tmp/deps.repos
-          
-#       - name: Pull rosinstall repositories
-#         uses: ros-tooling/action-ros-ci@v0.2
-#         with:
-#           target-ros1-distro: noetic
-#           vcs-repo-file-url: /tmp/deps.repos
-          
-      - name: Execute CRAM Tests
-        run: |
+      - run: |
           pwd
           echo "Runner tree:"
           tree -L 4 ../../
@@ -67,7 +47,23 @@ jobs:
           echo "---BEGIN TESTS---"
           # /usr/bin/sbcl --non-interactive --eval "(print \"Hello\")"          
           rosrun cram_tests test.sh
-
+          
+#       - name: Create rosinstall file
+#         run: |
+#           sudo apt-get install -y python3-wstool tree
+#           cd ros_ws/src
+#           wstool init
+#           # echo "GITHUB WORKSPACE: "
+#           # echo $GITHUB_WORKSPACE
+#           wstool merge $ROSINSTALL_FILE
+#           wstool rm cram
+#           cp .rosinstall /tmp/deps.repos
+          
+#       - name: Pull rosinstall repositories
+#         uses: ros-tooling/action-ros-ci@v0.2
+#         with:
+#           target-ros1-distro: noetic
+#           vcs-repo-file-url: /tmp/deps.repos
 
 
 # ---
