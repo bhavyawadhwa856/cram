@@ -19,7 +19,8 @@ jobs:
         with:
           required-ros-distributions: noetic
       - run: "source /opt/ros/noetic/setup.bash && rosnode --help"
-      - uses: ros-tooling/action-ros-ci@v0.2
+      - name: 
+        uses: ros-tooling/action-ros-ci@v0.2
         with:
           package-name: cram_tests cram_pr2_pick_place_demo
           target-ros1-distro: noetic
@@ -37,7 +38,7 @@ jobs:
           echo $ROS_PACKAGE_PATH
           echo "CMAKE_PREFIX_PATH:"
           echo $CMAKE_PREFIX_PATH
-          source /opt/ros/noetic/setup.bash
+          source install/local_setup.bash
           echo $(rospack find cram_tests)
           echo "upper repo:"
           ls -la $(rospack find cram_tests)/../../../../ # rospack not found
