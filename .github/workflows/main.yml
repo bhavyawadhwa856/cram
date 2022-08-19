@@ -19,18 +19,21 @@ jobs:
         with:
           required-ros-distributions: noetic
       - run: "source /opt/ros/noetic/setup.bash && rosnode --help"
-      - name: 
+      - name: Build Workspace
         uses: ros-tooling/action-ros-ci@v0.2
         with:
           package-name: cram_tests cram_pr2_pick_place_demo
           target-ros1-distro: noetic
           vcs-repo-file-url: ${{ env.ROSINSTALL_FILE }}
-      - run: |
+      - name: Run CRAM tests
+        run: |
           pwd
           echo "Runner tree:"
+          pwd
           tree -L 4 ../../
           cd $GITHUB_WORKSPACE
           echo "Workspace tree:"
+          pwd
           tree -L 3
           echo "GITHUB WORKSPACE: "
           echo $GITHUB_WORKSPACE
@@ -38,14 +41,8 @@ jobs:
           echo $ROS_PACKAGE_PATH
           echo "CMAKE_PREFIX_PATH:"
           echo $CMAKE_PREFIX_PATH
-          source install/local_setup.bash
+          source ros_ws/install/local_setup.bash
           echo $(rospack find cram_tests)
-          echo "upper repo:"
-          ls -la $(rospack find cram_tests)/../../../../ # rospack not found
-          echo "src:"
-          ls -la $(rospack find cram_tests)/../../../
-          source $(rospack find cram_tests)/../../../../devel/setup.bash
-          # source $GITHUB_WORKSPACE/ros_ws/devel/setup.bash
           echo "---BEGIN TESTS---"
           # /usr/bin/sbcl --non-interactive --eval "(print \"Hello\")"          
           rosrun cram_tests test.sh
