@@ -13,7 +13,6 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       ROS_CI_DESKTOP: "`lsb_release -cs`"  # e.g. [trusty|xenial|...]
-      CI_SOURCE_PATH: $(pwd)
       ROSINSTALL_FILE: $CI_SOURCE_PATH/dependencies.rosinstall
       ROS_PARALLEL_JOBS: '-j8 -l6'
       # Set the python path manually to include /usr/-/python3/dist-packages
@@ -24,6 +23,7 @@ jobs:
       - uses: actions/checkout@v1
       - name: Install ROS
         run: |
+            export CI_BUILD_PATH="$(pwd)"
             sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
             sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
             sudo apt-get update -qq
@@ -51,18 +51,19 @@ jobs:
         run: |
           source /opt/ros/$ROS_DISTRO/setup.bash
           mkdir -p $CI_SOURCE_PATH/ros_ws/src
-          tree -L 4
+          pwd
+          tree .. -L 4
           mv $CI_SOURCE_PATH/cram $CI_SOURCE_PATH/ros_ws/src/
           cd $CI_SOURCE_PATH/ros_ws
           rosdep install -y --ignore-src --from-paths src/ -r
-          catkin build
+          catkin build $ROS_PARALLEL_JOBS
           source devel/setup.bash
           cd $CI_SOURCE_PATH/ros_ws/src/
           wstool init
           wstool merge $(rospack find cram_tests)/../../cram-20.04-http.rosinstall
           wstool up
           cd $CI_SOURCE_PATH/ros_ws/
-          catkin build
+          catkin build $ROS_PARALLEL_JOBS
           source devel/setup.bash
           echo $(rospack find cram_tests)
           rosrun cram_tests test.sh
