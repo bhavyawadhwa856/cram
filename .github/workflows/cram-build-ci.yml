@@ -1,10 +1,12 @@
 name: ROS CI 20.04 | Build CRAM 
 
 on:
-   pull_request:
-    branches:
-      - noetic
-      - popcorn-noetic
+   workflow_dispatch:
+# on:
+#    pull_request:
+#     branches:
+#       - noetic
+#       - popcorn-noetic
   
 jobs:
   build:
@@ -13,7 +15,6 @@ jobs:
       ROS_CI_DESKTOP: "`lsb_release -cs`"  # e.g. [trusty|xenial|...]
       CI_SOURCE_PATH: $(pwd)
       ROSINSTALL_FILE: $CI_SOURCE_PATH/dependencies.rosinstall
-      CATKIN_OPTIONS: $CI_SOURCE_PATH/catkin.options
       ROS_PARALLEL_JOBS: '-j8 -l6'
       # Set the python path manually to include /usr/-/python3/dist-packages
       # as this is where apt-get installs python packages.
@@ -37,8 +38,11 @@ jobs:
             sudo apt-get install -y ros-$ROS_DISTRO-roslint
             sudo apt-get install -y ros-$ROS_DISTRO-std-msgs
             sudo apt-get install -y ros-$ROS_DISTRO-roslisp-repl
+            sudo apt-get install -y ros-$ROS_DISTRO-rosbash
+            sudo apt-get install -y ros-$ROS_DISTRO-roslaunch
             sudo apt-get install -y libassimp-dev
             sudo apt-get install -y libbullet-dev 
+            sudo apt-get install -y tree
             source /opt/ros/$ROS_DISTRO/setup.bash
             # Prepare rosdep to install dependencies.
             sudo rosdep init
@@ -46,13 +50,19 @@ jobs:
       - name: building CRAM
         run: |
           source /opt/ros/$ROS_DISTRO/setup.bash
-          mkdir -p ~/catkin_ws/src
-          cd ~/catkin_ws
+          mkdir -p $CI_SOURCE_PATH/ros_ws/src
+          tree -L 4
+          mv $CI_SOURCE_PATH/cram $CI_SOURCE_PATH/ros_ws/src/
+          cd $CI_SOURCE_PATH/ros_ws
+          rosdep install -y --ignore-src --from-paths src/ -r
           catkin build
           source devel/setup.bash
-          # echo "::warning $CI_SOURCE_PATH"
-          # echo "::warning `ls -l`"
-          cd src
-          ln -s ~/work  # $CI_SOURCE_PATH
-          cd ..
+          cd $CI_SOURCE_PATH/ros_ws/src/
+          wstool init
+          wstool merge $(rospack find cram_tests)/../../cram-20.04-http.rosinstall
+          wstool up
+          cd $CI_SOURCE_PATH/ros_ws/
           catkin build
+          source devel/setup.bash
+          echo $(rospack find cram_tests)
+          rosrun cram_tests test.sh
