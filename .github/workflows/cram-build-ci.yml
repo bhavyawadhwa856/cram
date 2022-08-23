@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: OpenGL Actions
         uses: NishkarshRaj/OpenGL_Actions@1.0
+      - name: GLXinfo
+        run: glxinfo
 #       - name: Set up OpenGL
 #         uses: openrndr/setup-opengl@v1.1
 #       - name: Check OpenGL
