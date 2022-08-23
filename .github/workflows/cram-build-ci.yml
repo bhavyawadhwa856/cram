@@ -47,32 +47,31 @@ jobs:
             # Prepare rosdep to install dependencies.
             sudo rosdep init
             rosdep update --include-eol-distros  # Support EOL distros.
-            export CI_SOURCE_PATH=$(pwd)
       - name: Construct Workspace and resources
         run: |
           source /opt/ros/$ROS_DISTRO/setup.bash
-          mkdir -p $CI_SOURCE_PATH/ros_ws/src/cram
-          cd $CI_SOURCE_PATH
-          ls -A | grep -v ros_ws | xargs mv -t $CI_SOURCE_PATH/ros_ws/src/cram/ > /dev/null # move the repo into the workspace
-          # mv $CI_SOURCE_PATH/cram $CI_SOURCE_PATH/ros_ws/src/
-          cd $CI_SOURCE_PATH/ros_ws/src
+          mkdir -p $GITHUB_WORKSPACE/ros_ws/src/cram
+          cd $GITHUB_WORKSPACE
+          ls -A | grep -v ros_ws | xargs mv -t $GITHUB_WORKSPACE/ros_ws/src/cram/ > /dev/null # move the repo into the workspace
+          # mv $GITHUB_WORKSPACE/cram $GITHUB_WORKSPACE/ros_ws/src/
+          cd $GITHUB_WORKSPACE/ros_ws/src
           wstool init
-          wstool merge $CI_SOURCE_PATH/ros_ws/src/cram/cram-20.04-http.rosinstall
+          wstool merge $GITHUB_WORKSPACE/ros_ws/src/cram/cram-20.04-http.rosinstall
           wstool remove cram
           wstool up
       - name: Rosdep install dependencies
         run: |
-          cd $CI_SOURCE_PATH/ros_ws/
+          cd $GITHUB_WORKSPACE/ros_ws/
           source /opt/ros/$ROS_DISTRO/setup.bash
           rosdep install -y --ignore-src --from-paths src/ -r
       - name: Build Workspace
         run: |
-          cd $CI_SOURCE_PATH/ros_ws/
+          cd $GITHUB_WORKSPACE/ros_ws/
           source /opt/ros/$ROS_DISTRO/setup.bash
           catkin build $ROS_PARALLEL_JOBS
       - name: Run Tests
         run: |
-          cd $CI_SOURCE_PATH/ros_ws/
+          cd $GITHUB_WORKSPACE/ros_ws/
           source devel/setup.bash
           export DISPLAY=:1
           rosrun cram_tests test.sh
