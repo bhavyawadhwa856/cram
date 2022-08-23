@@ -49,22 +49,25 @@ jobs:
             rosdep update --include-eol-distros  # Support EOL distros.
       - name: Build CRAM and run tests
         run: |
-          export CI_SOURCE_PATH="$(pwd)/.."
+          export CI_SOURCE_PATH=$(pwd)
           source /opt/ros/$ROS_DISTRO/setup.bash
-          mkdir -p $CI_SOURCE_PATH/ros_ws/src
+          mkdir -p $CI_SOURCE_PATH/ros_ws/src/cram
           pwd
           tree .. -L 4
-          mv $CI_SOURCE_PATH/cram $CI_SOURCE_PATH/ros_ws/src/
-          cd $CI_SOURCE_PATH/ros_ws
-          rosdep install -y --ignore-src --from-paths src/ -r
-          catkin build $ROS_PARALLEL_JOBS
-          source devel/setup.bash
-          cd $CI_SOURCE_PATH/ros_ws/src/
+          cd $CI_SOURCE_PATH
+          ls | grep -v ros_ws | xargs mv -t $CI_SOURCE_PATH/ros_ws/src/cram/ > /dev/null # move the repo into the workspace
+          # mv $CI_SOURCE_PATH/cram $CI_SOURCE_PATH/ros_ws/src/
+          cd $CI_SOURCE_PATH/ros_ws/src
           wstool init
-          wstool merge $(rospack find cram_tests)/../../cram-20.04-http.rosinstall
+          wstool merge $CI_SOURCE_PATH/ros_ws/src/cram/cram-20.04-http.rosinstall
           wstool up
           cd $CI_SOURCE_PATH/ros_ws/
+          rosdep install -y --ignore-src --from-paths src/ -r
           catkin build $ROS_PARALLEL_JOBS
           source devel/setup.bash
           echo $(rospack find cram_tests)
           rosrun cram_tests test.sh
+          # cd $CI_SOURCE_PATH/ros_ws/src/
+          # cd $CI_SOURCE_PATH/ros_ws/
+          # catkin build $ROS_PARALLEL_JOBS
+          # source devel/setup.bash
