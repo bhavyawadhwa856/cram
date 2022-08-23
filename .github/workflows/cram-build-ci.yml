@@ -20,7 +20,8 @@ jobs:
       PYTHONPATH: $PYTHONPATH:/usr/lib/python3/dist-packages:/usr/local/lib/python3/dist-packages
       ROS_DISTRO: noetic
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout repository
+        uses: actions/checkout@v1
       - name: Install ROS
         run: |
             sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
@@ -46,9 +47,9 @@ jobs:
             # Prepare rosdep to install dependencies.
             sudo rosdep init
             rosdep update --include-eol-distros  # Support EOL distros.
-      - name: building CRAM
+      - name: Build CRAM and run tests
         run: |
-          export CI_SOURCE_PATH="$(pwd)"
+          export CI_SOURCE_PATH="$(pwd)/.."
           source /opt/ros/$ROS_DISTRO/setup.bash
           mkdir -p $CI_SOURCE_PATH/ros_ws/src
           pwd
