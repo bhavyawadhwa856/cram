@@ -53,8 +53,6 @@ jobs:
           source /opt/ros/$ROS_DISTRO/setup.bash
           mkdir -p $CI_SOURCE_PATH/ros_ws/src/cram
           ls -a | grep -v ros_ws | xargs mv -t $CI_SOURCE_PATH/ros_ws/src/cram/ > /dev/null # move the repo into the workspace
-          pwd
-          tree .. -L 4
           # mv $CI_SOURCE_PATH/cram $CI_SOURCE_PATH/ros_ws/src/
           cd $CI_SOURCE_PATH/ros_ws/src
           wstool init
@@ -62,6 +60,8 @@ jobs:
           wstool remove cram
           wstool up
           cd $CI_SOURCE_PATH/ros_ws/
+          pwd
+          tree -L 3
           rosdep install -y --ignore-src --from-paths src/ -r
           catkin build $ROS_PARALLEL_JOBS
           source devel/setup.bash
