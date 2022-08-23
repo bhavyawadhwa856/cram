@@ -20,10 +20,12 @@ jobs:
       PYTHONPATH: $PYTHONPATH:/usr/lib/python3/dist-packages:/usr/local/lib/python3/dist-packages
       ROS_DISTRO: noetic
     steps:
-      - name: Set up OpenGL
-        uses: openrndr/setup-opengl@v1.1
-      - name: Check OpenGL
-        run: xvfb-run glxinfo
+      - name: OpenGL Actions
+        uses: NishkarshRaj/OpenGL_Actions@1.0
+#       - name: Set up OpenGL
+#         uses: openrndr/setup-opengl@v1.1
+#       - name: Check OpenGL
+#         run: xvfb-run glxinfo
       - name: Checkout repository
         uses: actions/checkout@v1
       - name: Install ROS
