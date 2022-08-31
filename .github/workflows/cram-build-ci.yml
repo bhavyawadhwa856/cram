@@ -58,7 +58,7 @@ jobs:
           source /opt/ros/$ROS_DISTRO/setup.bash
           mkdir -p $GITHUB_WORKSPACE/ros_ws/src/cram
           cd $GITHUB_WORKSPACE
-          ls -A | grep -v ros_ws | xargs mv -t $GITHUB_WORKSPACE/ros_ws/src/cram/ > /dev/null # move the repo into the workspace
+          # ls -A | grep -v ros_ws | xargs mv -t $GITHUB_WORKSPACE/ros_ws/src/cram/ > /dev/null # move the repo into the workspace
           # mv $GITHUB_WORKSPACE/cram $GITHUB_WORKSPACE/ros_ws/src/
           cd $GITHUB_WORKSPACE/ros_ws/src
           wstool init
