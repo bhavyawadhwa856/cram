@@ -25,7 +25,9 @@ jobs:
 #       - name: Check OpenGL
 #         run: xvfb-run glxinfo
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
+        with:
+          path: ./ros_ws/src/cram
       - name: Install ROS
         run: |
             sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
