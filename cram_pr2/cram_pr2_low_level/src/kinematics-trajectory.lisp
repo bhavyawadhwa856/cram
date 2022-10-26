@@ -110,7 +110,8 @@
 (defun make-current-seed-state (left-or-right)
   (let* ((joint-names-vector (get-ik-solver-joints left-or-right))
          (joint-names (map 'list #'identity joint-names-vector))
-         (joint-states (map 'vector #'joint-state-position (joint-states joint-names)))
+         (joint-states (map 'vector #'joints:joint-state-position
+                            (joints:joint-states joint-names)))
          (zero-vector (apply #'vector (make-list
                                        (length joint-names)
                                        :initial-element 0.0))))
@@ -133,8 +134,9 @@
          (roslisp:make-request
           "moveit_msgs/GetPositionIK"
           (:ik_link_name :ik_request) ik-link
-          (:pose_stamped :ik_request) (cl-tf:to-msg
-                                       (cl-tf:pose->pose-stamped ik-base-frame 0.0 cartesian-pose))
+          (:pose_stamped :ik_request) (cl-transforms-stamped:to-msg
+                                       (cl-transforms-stamped:pose->pose-stamped
+                                        ik-base-frame 0.0 cartesian-pose))
           (:joint_state :robot_state :ik_request) (make-zero-seed-state left-or-right)
           (:timeout :ik_request) 1.0))
       (cond ((eql error-code
@@ -169,8 +171,9 @@
                (roslisp:make-request
                 "moveit_msgs/GetPositionIK"
                 (:ik_link_name :ik_request) ik-link
-                (:pose_stamped :ik_request) (cl-tf:to-msg
-                                             (cl-tf:pose->pose-stamped ik-base-frame 0.0 cartesian-pose))
+                (:pose_stamped :ik_request) (cl-transforms-stamped:to-msg
+                                             (cl-transforms-stamped:pose->pose-stamped
+                                              ik-base-frame 0.0 cartesian-pose))
                 (:joint_state :robot_state :ik_request) (make-current-seed-state left-or-right)
                 (:timeout :ik_request) 1.0)))
           (cond ((eql response-error-code

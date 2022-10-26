@@ -1,19 +1,19 @@
 ;;; Copyright (c) 2010, Lorenz Moesenlechner <moesenle@in.tum.de>
 ;;; All rights reserved.
-;;; 
+;;;
 ;;; Redistribution and use in source and binary forms, with or without
 ;;; modification, are permitted provided that the following conditions are met:
-;;; 
+;;;
 ;;;     * Redistributions of source code must retain the above copyright
 ;;;       notice, this list of conditions and the following disclaimer.
 ;;;     * Redistributions in binary form must reproduce the above copyright
 ;;;       notice, this list of conditions and the following disclaimer in the
 ;;;       documentation and/or other materials provided with the distribution.
 ;;;     * Neither the name of the Intelligent Autonomous Systems Group/
-;;;       Technische Universitaet Muenchen nor the names of its contributors 
-;;;       may be used to endorse or promote products derived from this software 
+;;;       Technische Universitaet Muenchen nor the names of its contributors
+;;;       may be used to endorse or promote products derived from this software
 ;;;       without specific prior written permission.
-;;; 
+;;;
 ;;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ;;; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ;;; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -108,7 +108,7 @@
 
 (defgeneric costmap-generator-name->score (name)
   (:documentation "Returns the score for the costmap generator with
-  name `name'. Greater scores result in earlier evaluation.")
+  name `name'. Greater scores result in later evaluation.")
   (:method ((name number))
     name))
 
@@ -125,7 +125,7 @@ calls the generator functions and runs normalization."
       (setf (slot-value map 'cost-functions)
             (sort (remove-duplicates (slot-value map 'cost-functions)
                                      :key #'generator-name)
-                  #'> :key (compose
+                  #'< :key (compose
                             #'costmap-generator-name->score
                             #'generator-name)))
       (let ((new-cost-map (cma:make-double-matrix
@@ -219,8 +219,8 @@ calls the generator functions and runs normalization."
     (destructuring-bind (column row)
         (funcall sampling-function cost-map)
       (with-slots (origin-x origin-y resolution) map
-        (let* ((x (+ (* column resolution) origin-x))
-               (y (+ (* row resolution) origin-y))
+        (let* ((x (+ (* column resolution) origin-x (/ resolution 2.0)))
+               (y (+ (* row resolution) origin-y (/ resolution 2.0)))
                (z (generate-height map x y))
                (point (cl-transforms:make-3d-vector x y z)))
           (on-visualize-costmap-sample point)

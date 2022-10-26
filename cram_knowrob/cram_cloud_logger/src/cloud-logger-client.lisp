@@ -1,10 +1,41 @@
-(in-package :ccl)
+;;;
+;;; Copyright (c) 2017-2022, Sebastian Koralewski <seba@cs.uni-bremen.de>
+;;;
+;;; All rights reserved.
+;;;
+;;; Redistribution and use in source and binary forms, with or without
+;;; modification, are permitted provided that the following conditions are met:
+;;;
+;;;     * Redistributions of source code must retain the above copyright
+;;;       notice, this list of conditions and the following disclaimer.
+;;;     * Redistributions in binary form must reproduce the above copyright
+;;;       notice, this list of conditions and the following disclaimer in the
+;;;       documentation and/or other materials provided with the distribution.
+;;;     * Neither the name of the Institute for Artificial Intelligence/
+;;;       Universitaet Bremen nor the names of its contributors may be used to
+;;;       endorse or promote products derived from this software without
+;;;       specific prior written permission.
+;;;
+;;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+;;; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+;;; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+;;; ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+;;; LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+;;; CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+;;; SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+;;; INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+;;; CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+;;; POSSIBILITY OF SUCH DAMAGE.
 
+(in-package :ccl)
 
 (defparameter *cloud-logger-client* nil)
 (defparameter *is-client-connected* nil)
-(defparameter *is-logging-enabled* nil)
+;;(defparameter *is-logging-enabled* nil)
+(defvar *my-mutex* (sb-thread:make-mutex))
 
+;; Sebastian's setup on his PC
 (defparameter *host* "'https://localhost'")
 ;;(defparameter *host* "'https://192.168.101.42'")
 (defparameter *cert-path* "'/home/koralewski/Desktop/localhost.pem'")
@@ -21,6 +52,17 @@
 ;;(defparameter *host* "'https://192.168.101.42'")
 ;; Asil's certificate on ease@pr2a
 ;;(defparameter *cert-path* "'/home/ease/asil.pem'")
+;;(defparameter *api-key* "'MxtU9V2cdstw3ocKXbicBGp7fAeLNxjIvcmY4CJV96DeZd7obfgvw0mR3X5j8Yrz'")
+
+;; Gaya's token on Sebastian's PC
+(defparameter *host* "'https://192.168.100.172'")
+(defparameter *cert-path* "'/home/cram/Desktop/sebastian.pem'")
+(defparameter *api-key* "'hftn9KwE77FEhDv9k6jV7rJT7AK6nPizZJUhjw5Olbxb2a3INUL8AM3DNp9Ci6L1'")
+
+;; EASE PR2 setup with Sebastian as OpenEASE and token
+(defparameter *host* "'https://192.168.100.172'")
+(defparameter *cert-path* "'/home/ease/openease-certificates/sebastian.pem'")
+(defparameter *api-key* "'K103jdr40Rp8UX4egmRf42VbdB1b5PW7qYOOVvTDAoiNG6lcQoaDHONf5KaFcefs'")
 
 
 (defclass cloud-logger-client()
@@ -29,6 +71,9 @@
    (token :accessor get-token)
    (current-query-id :accessor get-current-query-id)))
 
+
+(define-condition ccl-failure (cpl:simple-plan-failure) ()
+  (:documentation "CCL had a failure."))
 
 (defun connect-to-cloud-logger ()
   (when *is-logging-enabled*
@@ -60,14 +105,19 @@
 
 (defun send-prolog-query-1 (prolog-query)
   ;;(print prolog-query)
-  (if *is-logging-enabled*
-   (let ((query-id (get-id-from-query-result
-                    (json-prolog:prolog-simple-1
-                     (concatenate 'string "send_prolog_query('"
-                                  (string prolog-query) "', @(false), Id)")))))
-     (let ((query-result (send-next-solution query-id)))
-       (send-finish-query query-id)
-       query-result))))
+  (when *is-logging-enabled*
+    (sb-thread:with-mutex (*my-mutex*)
+     (handler-case
+        (let ((query-id (get-id-from-query-result
+                         (json-prolog:prolog-simple-1
+                          (concatenate 'string "send_prolog_query('"
+                                       (string prolog-query) "', @(false), Id)")))))
+          (let ((query-result (send-next-solution query-id)))
+            (send-finish-query query-id)
+            query-result))
+      (simple-error (e)
+        (roslisp:ros-error (ccl) "error in json prolog: ~a~%" e)
+        (cpl:fail 'ccl-failure :format-control "Error in json prolog."))))))
 
 (defun send-prolog-query (prolog-query)
   (json-prolog:prolog-simple

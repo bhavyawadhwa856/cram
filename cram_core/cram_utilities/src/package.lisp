@@ -83,10 +83,12 @@
   #.`(:import-from :sb-thread             #:thread ,@+semaphore-symbols+)
   #.`(:import-from :sb-concurrency        ,@+queue-symbols+)
   #.`(:import-from :sb-concurrency        ,@+mailbox-symbols+)
-  #.`(:import-from :synchronization-tools ,@+barrier-symbols+)
+  ;;#.`(:import-from :synchronization-tools ,@+barrier-symbols+)
   #.`(:export
       ;; clos
       #:hooks
+      #:ordered-hooks
+      #:first-in-order-and-around
       #:define-hook
       #:copy-object
       ;; conditions
@@ -118,6 +120,7 @@
       #:compare
       #:choose
       #:equalize-two-list-lengths #:equalize-lists-of-lists-lengths
+      #:recursive-alist-hash-table
       ;; time
       #:current-timestamp
       #:set-default-timestamp-function
@@ -158,8 +161,8 @@
       #:make-synchronized-hash-table
       #:with-hash-table-locked
       ;; utils
-      #:minimum #:maximum #:compare
-      #:execute-string
+      #:minimum #:maximum #:random-with-minimum #:compare
+      #:execute-string #:replace-all
       ;; semaphores, reexported from sb-thread
       ,@+semaphore-symbols+
       ;; mailboxes, reexported from sb-concurrency

@@ -1,9 +1,10 @@
+;;;
 ;;; Copyright (c) 2012, Lorenz Moesenlechner <moesenle@in.tum.de>
 ;;; All rights reserved.
-;;; 
+;;;
 ;;; Redistribution and use in source and binary forms, with or without
 ;;; modification, are permitted provided that the following conditions are met:
-;;; 
+;;;
 ;;;     * Redistributions of source code must retain the above copyright
 ;;;       notice, this list of conditions and the following disclaimer.
 ;;;     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +14,7 @@
 ;;;       Technische Universitaet Muenchen nor the names of its contributors 
 ;;;       may be used to endorse or promote products derived from this software 
 ;;;       without specific prior written permission.
-;;; 
+;;;
 ;;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ;;; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ;;; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -40,10 +41,19 @@
    #:update-bullet-transforms
    ;; occasions
    #:object-designator-name
-   ;; event handlers
-   #:object-pose-in-frame
+   ;; event-handlers
+   #:snap-object-onto-robot
    ;; belief-state
-   #:*robot-urdf* #:*kitchen-urdf*
-   #:*robot-parameter* #:*kitchen-parameter*
    #:*spawn-debug-window*
-   #:setup-world-database))
+   #:setup-world-database
+   #:spawn-world
+   #:vary-kitchen-urdf
+   ;; world-state-detecting
+   #:world-state-detecting-pm
+   ;; consistency-checking
+   #:*artificial-perception-noise-factor*
+   #:*perception-instability-threshold*
+   #:*perception-noise-correction-offset*
+   #:*perception-noise-correction-iterations*
+   #:*perception-noise-correction-step*
+   #:*perception-noise-simulation-timeout*))

@@ -28,6 +28,9 @@
 
 (in-package :btr)
 
+(defun multiple-value-list-fun (fun &rest args)
+  (multiple-value-list (apply fun args)))
+
 (def-fact-group robot-model (assert retract available-arms)
 
   (<- (link ?world ?robot-name ?link)
@@ -65,13 +68,24 @@
     (%link-pose ?robot ?name ?pose))
 
   (<- (head-pointing-at ?w ?robot-name ?pose)
-    (cram-robot-interfaces:robot ?robot-name)
-    (cram-robot-interfaces:robot-pan-tilt-links ?robot-name ?pan-link ?tilt-link)
-    (cram-robot-interfaces:robot-pan-tilt-joints ?robot-name ?pan-joint ?tilt-joint)
+    (rob-int:robot ?robot-name)
+    (rob-int:robot-neck-links ?robot-name ?pan-link ?tilt-link)
+    (rob-int:robot-neck-joints ?robot-name ?pan-joint ?tilt-joint)
+    (rob-int:robot-neck-pan-joint-forward-facing-axis-sign
+     ?robot-name ?pan-axis ?pan-sign)
+    (rob-int:robot-neck-tilt-joint-forward-facing-axis-sign
+     ?robot-name ?tilt-axis ?tilt-sign)
+    (rob-int:joint-lower-limit ?robot-name ?pan-joint ?pan-lower-limit)
+    (rob-int:joint-upper-limit ?robot-name ?pan-joint ?pan-upper-limit)
+    (rob-int:joint-lower-limit ?robot-name ?tilt-joint ?tilt-lower-limit)
+    (rob-int:joint-upper-limit ?robot-name ?tilt-joint ?tilt-upper-limit)
     (bullet-world ?w)
     (%object ?w ?robot-name ?robot)
     (lisp-fun calculate-pan-tilt
               ?robot ?pan-link ?tilt-link ?pose
+              ?pan-axis ?pan-sign ?tilt-axis ?tilt-sign
+              ?pan-lower-limit ?pan-upper-limit
+              ?tilt-lower-limit ?tilt-upper-limit
               (?pan-pos ?tilt-pos))
     (lisp-fun set-joint-state ?robot ?pan-joint ?pan-pos ?_)
     (lisp-fun set-joint-state ?robot ?tilt-joint ?tilt-pos ?_))
@@ -107,20 +121,27 @@
                   (and (slot-value ?world disabled-collision-objects ?objects)
                        (or (member (?robot-name ?object-name) ?objects)
                            (member (?object-name ?robot-name) ?objects)))
-                  (gripper-link ?robot-name ?_ ?link)))))
+                  (hand-link ?robot-name ?_ ?link)))))
+
+  (<- (attached ?world ?robot ?link-name ?object ?grasp)
+    (bullet-world ?world)
+    (%object ?world ?robot ?robot-instance)
+    (lisp-fun attached-objects ?robot-instance ?object-attachments-list)
+    (member (?object . ?_) ?object-attachments-list)
+    (object ?world ?object)
+    (%object ?world ?object ?object-instance)
+    (lisp-fun multiple-value-list-fun object-attached ?robot-instance ?object-instance
+              (?links ?grasps))
+    (lisp-fun mapcar list ?links ?grasps ?link-grasp-list)
+    (member (?link-name ?grasp) ?link-grasp-list))
 
   (<- (attached ?world ?robot ?link-name ?object)
-    (bullet-world ?world)
-    (object ?world ?object)
-    (%object ?world ?robot ?robot-instance)
-    (%object ?world ?object ?object-instance)
-    (lisp-fun object-attached ?robot-instance ?object-instance ?links)
-    (member ?link-name ?links))
+    (attached ?world ?robot ?link-name ?object ?_))
 
   (<- (assert ?world (attached ?robot ?link-name ?object))
     (bullet-world ?world)
     (%object ?world ?robot ?robot-instance)
-    (lisp-fun attach-object ?robot-instance ?object ?link-name ?_))
+    (lisp-fun attach-object ?robot-instance ?object :link ?link-name ?_))
 
   (<- (assert (attached ?world ?robot ?link-name ?object))
     (assert ?world (attached ?robot ?link-name ?object)))
@@ -133,7 +154,7 @@
   (<- (retract ?world (attached ?robot ?link-name ?object))
     (bullet-world ?world)
     (%object ?world ?robot ?robot-instance)
-    (lisp-fun detach-object ?robot-instance ?object ?link-name ?_))
+    (lisp-fun detach-object ?robot-instance ?object :link ?link-name ?_))
 
   (<- (retract (attached ?world . ?rest))
     (retract ?world (attached . ?rest)))
@@ -144,4 +165,4 @@
     (forall (member ?arm ?arms)
             (and
              (end-effector-link ?robot ?arm ?link)
-             (not (btr:attached ?_ ?robot ?link ?_))))))
+             (not (attached ?_ ?robot ?link ?_))))))

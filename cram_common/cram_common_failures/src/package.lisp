@@ -4,7 +4,7 @@
 ;;;
 ;;; Redistribution and use in source and binary forms, with or without
 ;;; modification, are permitted provided that the following conditions are met:
-2;;;
+;;;
 ;;;     * Redistributions of source code must retain the above copyright
 ;;;       notice, this list of conditions and the following disclaimer.
 ;;;     * Redistributions in binary form must reproduce the above copyright
@@ -53,6 +53,12 @@
    #:object-nowhere-to-be-found-object
    #:environment-manipulation-impossible
    #:environment-unreachable
+   #:searching-failed
+   #:searching-failed-object
+   #:fetching-failed
+   #:fetching-failed-object
+   #:delivering-failed
+   #:delivering-failed-object
    ;; manipulation
    #:manipulation-low-level-failure
    #:gripper-low-level-failure
@@ -61,6 +67,7 @@
    #:gripper-goal-not-reached
    #:manipulation-goal-not-reached
    #:manipulation-pose-unreachable
+   #:environment-manipulation-goal-not-reached
    ;; navigation
    #:navigation-low-level-failure
    #:navigation-failure-location
@@ -70,6 +77,7 @@
    #:perception-low-level-failure
    #:perception-object-not-found
    #:object-not-found-object
+   #:perception-object-not-in-world
    ;; ptu
    #:ptu-low-level-failure
    #:ptu-goal-unreachable
@@ -77,4 +85,9 @@
    ;; torso
    #:torso-low-level-failure
    #:torso-goal-unreachable
-   #:torso-goal-not-reached))
+   #:torso-goal-not-reached
+   ;; failure-handling-strategies
+   #:retry-with-designator-solutions
+   #:retry-with-loc-designator-solutions
+   #:retry-with-list-solutions
+   #:next-different-location-solution))

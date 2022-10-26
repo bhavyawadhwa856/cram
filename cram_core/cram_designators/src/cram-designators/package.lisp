@@ -45,10 +45,11 @@
            #:make-designator
            #:copy-designator
            #:merge-desig-descriptions
-           #:extend-designator-properties
+           #:extend-designator-properties #:rename-designator-property-key
            #:first-desig
            #:current-desig
            #:current-designator
+           #:reset
            #:make-effective-designator
            #:newest-effective-designator #:with-desig-props
            #:designator-solutions #:desig-prop-value
@@ -71,6 +72,7 @@
            #:motion-designator #:motion-grounding
            #:location-designator
            #:*location-generator-max-retries*
+           #:*print-location-validation-function-results*
            #:register-location-generator
            #:register-location-validation-function
            #:list-location-generators
@@ -85,6 +87,7 @@
            #:designator-pose
            #:designator-distance
            #:resolve-designator
+           #:resolve-location-designator-through-generators-and-validators
            #:delete-location-generator-function
            #:delete-location-validation-function
            #:enable-location-generator-function

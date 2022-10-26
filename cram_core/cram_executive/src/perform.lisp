@@ -29,8 +29,6 @@
 
 (in-package :exe)
 
-(defvar *logged-action-list* nil)
-
 (define-condition designator-reference-failure (cpl:simple-plan-failure desig:designator-error)
   ((result :initarg :result :reader result :initform nil))
   (:default-initargs :format-control "designator-failure"))
@@ -38,23 +36,45 @@
   ((result :initarg :result :reader result :initform nil))
   (:default-initargs :format-control "designator-goal-parsing-failure"))
 
-(defun try-reference-designator (designator &optional (error-message ""))
-  (handler-case (reference designator)
-    (desig:designator-error ()
-      (cpl:fail 'designator-reference-failure
-                :format-control "Designator ~a could not be resolved.~%~a"
-                :format-arguments (list designator error-message)))))
+(defgeneric try-reference-designator (designator &optional error-message)
+  (:method (designator &optional (error-message ""))
+    (handler-case (reference designator)
+      (desig:designator-error ()
+        (cpl:fail 'designator-reference-failure
+                  :format-control "Designator ~a could not be resolved.~%~a"
+                  :format-arguments (list designator error-message))))))
 
 (defun convert-desig-goal-to-occasion (keyword-expression)
-  (handler-case (destructuring-bind (occasion &rest params)
-                    keyword-expression
-                  (cons ;; (intern (string-upcase occasion) :keyword)
-                   occasion
-                   params))
+  (handler-case
+      (destructuring-bind (occasion &rest params)
+          keyword-expression
+        ;; (intern (string-upcase occasion) :keyword)
+        (cons occasion params))
     (error (error-message)
       (cpl:fail 'designator-goal-parsing-failure
                 :format-control "Designator goal ~a could not be parsed.~%~a"
                 :format-arguments (list keyword-expression error-message)))))
+
+(defun call-action-designator-plan (action-designator)
+  (declare (type desig:action-designator action-designator))
+  "Returns the result of executing the plan function and the action-designator
+that was used as the parameter of the plan as multiple values."
+  (destructuring-bind (plan-function referenced-action-designator)
+      (try-reference-designator action-designator)
+    (if (fboundp plan-function)
+        (let ((designator-props-as-key-lambda-list
+                (let (plist)
+                  (dolist (pair (desig:properties referenced-action-designator))
+                    (push (first pair) plist)
+                    (push (second pair) plist))
+                  (nreverse plist))))
+          (roslisp:ros-info (perform resolved) "~%~A~%~%"
+                            referenced-action-designator)
+          (values (apply plan-function designator-props-as-key-lambda-list)
+                  referenced-action-designator))
+        (cpl:fail "Action designator `~a' resolved to cram function `~a', ~
+                   but it isn't defined. Cannot perform action."
+                  action-designator plan-function))))
 
 (cpl:declare-goal perform (designator)
   (declare (ignore designator))
@@ -74,26 +94,24 @@ For future we can implement something like next-different-action-solution
 similar to what we have for locations.")
 
   (:method ((designator motion-designator))
+    (roslisp:ros-info (perform motion) "~%~A~%~%" designator)
     (unless (cpm:matching-available-process-modules designator)
       (cpl:fail "No matching process module found for ~a" designator))
     (try-reference-designator designator "Cannot perform motion.")
     (cpm:pm-execute-matching designator))
 
   (:method ((designator action-designator))
-    (destructuring-bind (command &rest arguments)
-        (try-reference-designator designator)
-      (if (fboundp command)
-          (let ((desig-goal (desig-prop-value designator :goal)))
+    (roslisp:ros-info (perform action) "~%~A~%~%" designator)
+    (let ((desig-goal (desig-prop-value designator :goal)))
             (if desig-goal
                 (let ((occasion (convert-desig-goal-to-occasion desig-goal)))
-                  (if (cram-occasions-events:holds occasion)
-                      (warn 'simple-warning
-                            :format-control "Action goal `~a' already achieved."
-                            :format-arguments (list occasion))
-                      (apply command arguments))
-                  (unless (cram-occasions-events:holds occasion)
-                    (cpl:fail "Goal `~a' of action `~a' was not achieved."
-                              designator occasion)))
-                (apply command arguments)))
-          (cpl:fail "Action designator `~a' resolved to cram function `~a', ~
-                       but it isn't defined. Cannot perform action." designator command)))))
+                  (prog1
+                      (if (cram-occasions-events:holds occasion)
+                          (roslisp:ros-info (perform action)
+                                            "Action goal `~a' already achieved."
+                                            (list occasion))
+                          (call-action-designator-plan designator))
+                    (unless (cram-occasions-events:holds occasion)
+                      (warn "Goal `~a' of action `~a' was not achieved."
+                            occasion designator))))
+                (call-action-designator-plan designator)))))

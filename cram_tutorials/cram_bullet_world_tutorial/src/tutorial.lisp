@@ -32,14 +32,14 @@
 
 (defun get-kitchen-urdf ()
   (slot-value
-   (btr:object btr:*current-bullet-world* :kitchen)
+   (btr:get-environment-object)
    'cram-bullet-reasoning:urdf))
 
 (defun move-kitchen-joint (&key (joint-name "iai_fridge_door_joint")
-                             (joint-angle 0.2d0) (kitchen-name :kitchen))
+                             (joint-angle 0.2d0))
   (btr:set-robot-state-from-joints
    `((,joint-name  ,joint-angle))
-   (btr:object btr:*current-bullet-world* kitchen-name)))
+   (btr:get-environment-object)))
 
 (defun add-objects-to-mesh-list (&optional (ros-package "cram_bullet_world_tutorial"))
   (mapcar (lambda (object-filename-and-object-extension)
@@ -73,10 +73,10 @@
    (cl-transforms:make-identity-rotation)))
 
 (defparameter *pose-meal-table*
-  (cl-tf:make-pose-stamped
+  (cl-transforms-stamped:make-pose-stamped
    "map" 0.0
-   (cl-tf:make-3d-vector -0.15 2.0 0)
-   (cl-tf:make-quaternion 0.0d0 0.0d0 -1.0d0 0.0d0)))
+   (cl-transforms:make-3d-vector -0.15 2.0 0)
+   (cl-transforms:make-quaternion 0.0d0 0.0d0 -1.0d0 0.0d0)))
 
 (defparameter *pose-counter*
   (cl-transforms-stamped:make-pose-stamped
@@ -98,12 +98,12 @@
 (defun navigate-to (?navigation-goal)
   (exe:perform (desig:a motion
                         (type going)
-                        (target (desig:a location (pose ?navigation-goal))))))
+                        (pose ?navigation-goal))))
 
 (defun look-at (?point-of-interest)
   (exe:perform (desig:a motion
                         (type looking)
-                        (target (desig:a location (pose ?point-of-interest))))))
+                        (pose ?point-of-interest))))
 
 (defun get-perceived-bottle-desig ()
   (let* ((?bottle-desig (desig:an object (type bottle)))
@@ -128,7 +128,7 @@
 
 (defun test-switch-two-bottles ()
   (spawn-two-bottles)
-  (proj:with-projection-environment pr2-proj::pr2-bullet-projection-environment
+  (proj:with-projection-environment urdf-proj:urdf-bullet-projection-environment
     (cpl:top-level
       ;; Go to counter top and perceive bottle
       (let ((?navigation-goal *pose-counter*)
@@ -142,13 +142,18 @@
           ;; Move torso up
           (exe:perform
            (desig:a motion (type moving-torso) (joint-angle 0.3)))
-          (pp-plans::park-arms)
+          (exe:perform
+           (desig:an action
+                     (type parking-arms)))
           (navigate-to ?navigation-goal))
         (look-at ?ptu-goal))
       ;; Pick up bottle-1 with right arm.
       (let ((?perceived-bottle-1 (get-perceived-bottle-desig)))
         (pick-up ?perceived-bottle-1 :right)
-        (pp-plans::park-arms :arm :right)
+        (exe:perform
+         (desig:an action
+                   (type parking-arms)
+                   (arms (:right))))
         ;; Move to the meal table
         (let ((?pose *pose-meal-table*))
           (navigate-to ?pose))
@@ -156,16 +161,24 @@
         (let ((?perceived-bottle-2 (get-perceived-bottle-desig)))
           (pick-up ?perceived-bottle-2 :left)
           ;; Move left arm out of sight
-          (pp-plans::park-arms :arm :left)
+          (exe:perform
+           (desig:an action
+                     (type parking-arms)
+                     (arms (:left))))
           ;; Place bottle-1 on second table
           (let ((?drop-pose *pose-bottle-2*))
             (place-down ?drop-pose ?perceived-bottle-1 :right))
           ;; Move right arm out of sight
-          (pp-plans::park-arms :arm :right)
-          ;; Move to the counter table 
+          (exe:perform
+           (desig:an action
+                     (type parking-arms)
+                     (arms (:right))))
+          ;; Move to the counter table
           (let ((?navigation-goal *pose-counter*))
             (navigate-to ?navigation-goal))
           ;; Place bottle-2 on the counter
           (let ((?drop-pose *pose-bottle-1*))
             (place-down ?drop-pose ?perceived-bottle-2 :left))
-          (pp-plans::park-arms))))))
+          (exe:perform
+           (desig:an action
+                     (type parking-arms))))))))

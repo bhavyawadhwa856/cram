@@ -34,40 +34,40 @@
   (:use #:common-lisp
         #:cram-occasions-events
         #:cram-prolog)
-  (:export #:object-perceived-event
-           #:robot-state-changed
-           #:object-connection-event
-           #:object-articulation-event
-           #:object-attached #:object-detached
-           #:object-removed-event
-           #:object-updated-event #:event-object-name
-           #:event-object-designator #:object-designator
-           #:perception-source #:object #:event-object
-           #:link #:event-link #:side #:event-side
-           #:opening-distance
+  (:export
+   ;; default-plan-events
+   #:object-perceived-event
+   #:object-location-changed
+   #:robot-state-changed
+   #:object-connection-event
+   #:object-attached-robot #:object-detached-robot
+   #:object-attached-object #:object-detached-object
+   #:environment-manipulation-event
+   #:container-opening-event #:container-closing-event
 
-           #:environment-manipulation-event
-           #:environment-event-joint-name
-           #:environment-event-arm
-           #:environment-event-object
-           #:environment-event-distance
-           #:container-handle-grasping-event
-           #:container-opening-event
-           #:container-closing-event
+   #:perception-source
+   #:event-location-designator
+   #:event-object-designator
+   #:event-object-name
+   #:event-other-object-name
+   #:event-attachment-type
+   #:event-arm
+   #:event-link
+   #:event-grasp
+   #:event-not-loose
+   #:environment-event-joint-name
+   #:environment-event-arm
+   #:environment-event-object
+   #:environment-event-distance
 
-           ;; #:object-gripped
-           ;; #:event-arm #:event-object #:event-grasp
-           ;; #:object-released
-
-           ;; object connection event
-           #:event-arm #:event-object-name
-
-           ;; occasion-declarations
-           ;; Symbols used in plans and thus the execution trace.
-           #:object-in-hand
-           #:object-placed-at
-           #:object-picked
-           #:object-put
-           #:loc
-           #:looking-at
-           #:arms-parked))
+   ;; occasion-declarations
+   ;; Symbols used in plans and thus the execution trace.
+   #:object-in-hand
+   #:object-at-location #:object-placed #:robot-at-location
+   #:torso-at #:gripper-joint-at
+   #:gripper-opened #:gripper-closed
+   #:arms-positioned-at #:tool-frames-at
+   #:looking-at
+   #:container-state
+   #:location-reset
+   #:location-accessible))

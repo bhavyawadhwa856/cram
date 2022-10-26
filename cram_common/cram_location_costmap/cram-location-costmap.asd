@@ -53,12 +53,14 @@
              (:file "location-costmap"
               :depends-on ("package" "occupancy-grid" "costmap-generators"))
              (:file "2d-value-map" :depends-on ("package" "occupancy-grid"))
-             (:file "location-prolog-handlers"
-              :depends-on ("package" "location-costmap" "2d-value-map"))
-             (:file "designator-integration" :depends-on ("package" "location-costmap")) 
              (:file "facts" :depends-on ("package" "cost-functions"))
+             (:file "location-prolog-handlers"
+              :depends-on ("package" "location-costmap" "2d-value-map" "facts"))
+             (:file "designator-integration" :depends-on ("package" "location-costmap"))
              (:file "cost-function-utils" :depends-on ("package"))
              (:file "ros-grid-cells" :depends-on ("package" "2d-value-map"))
              (:file "ros-occupancy-grid" :depends-on ("package"))
              (:file "visualization"
-              :depends-on ("package" "occupancy-grid" "location-costmap"))))))
+              :depends-on ("package" "occupancy-grid" "location-costmap"))
+             ;; implemented for optimizing costmaps but not integrated yet
+             (:file "quadtree" :depends-on ("package"))))))

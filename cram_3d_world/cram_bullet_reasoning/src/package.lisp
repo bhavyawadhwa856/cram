@@ -39,6 +39,7 @@
   (:shadowing-import-from #:cl-bullet points pose)
   (:shadow copy-object)
   (:export *current-bullet-world* *current-timeline* *visibility-threshold*
+           *all-meshes-as-compound* *robot-model-alpha*
            merge-bounding-boxes aabb calculate-bb-dims
            with-stored-world *debug-window*
            add-debug-window add-costmap-function-object add-vis-axis-object
@@ -47,23 +48,28 @@
            height fov-y z-near z-far pose gl-execute-with-camera
            camera-transform look-at-object-rotation
            with-rendering-to-framebuffer render-to-framebuffer
-           get-rendering-context read-pixelbuffer read-depthbuffer to-png-image
+           get-rendering-context read-pixelbuffer read-depthbuffer
+           to-png-image png-from-camera-view
            add-object generic-cup item mesh
            remove-object object
-           object-type item-type name rigid-bodies
+           object-type item-type item-types name rigid-bodies
            rigid-body-names rigid-body world make-object box
            static-plane sphere cylinder cone point-cloud
            cutlery fork knife mug plate mondamin pot bowl sugar-box apple orange
            cereal spatula pancake pancake-maker
            bt-reasoning-world invalidate-object objects object %object
-           bt-reasoning-world-state robot-object links joint-states
+           bt-reasoning-world-state
+           get-world-objects-pose-info restore-world-poses
+           robot-object links joint-states
            assert joint-state urdf joint-names joint-state link-names
-           link-pose set-robot-state-from-tf
+           link-pose
            semantic-map-object ensure-pose ensure-vector object-visibility
            semantic-map container semantic-map-part semantic-map-part-type
            semantic-map-part-pose object-visibility-percentage
            object-visibility-occluding-objects flat-color-object-proxy
-           calculate-object-visibility object-visible-p
+           calculate-object-visibility
+           object-visible-p looking-at-object-p object-in-view-p
+           looking-at-pose-p
            occluding-objects simulate find-objects contact-p
            find-all-contacts find-objects-in-contact
            object-pose-different
@@ -81,24 +87,42 @@
            ;; reach-pose-ik reach-object-ik point-reachable-p reach-point-ik
            ;; object-reachable-p pose-reachable-p calculate-orientation-in-robot
            ;; calculate-object-tool-length
-           set-robot-state-from-joints
-           calculate-pan-tilt
-           init-ros-object-database clear-bullet-world
-           ros-household-object execute open close ;; reach-ik-solution
+           clear-bullet-world
+           execute open close ;; reach-ik-solution
            attached attached-objects object-attached
-           attach-object detach-object detach-all-objects
+           attach-object detach-object detach-all-objects detach-all-from-link
+           get-loose-attached-objects remove-loose-attachment-for
+           link-attached-object-names object-name-attached-links
            item-dimensions
            add-objects-to-mesh-list
-           make-joint-state-message open-object close-object
+           open-object close-object
            set-articulated-object-joint-position
            with-world copied-world with-copied-world
            obj-pose-on obj-poses-on flat-color-object-proxy drawable-list
            drawable-list-drawables make-drawable-list
            ;; robot-model-utils
-           #:get-robot-object #:get-robot-name
-           #:get-environment-object
+           #:set-robot-state-from-tf
+           #:set-robot-state-from-joints
+           #:make-robot-joint-state-msg
+           #:make-joint-state-message
+           #:calculate-pan-tilt #:looking-in-direction-p
+           #:robot-converged-to-goal-joint-states
+           #:get-robot-object #:get-environment-object
            #:robot-colliding-objects-without-attached
+           #:robot-attached-objects-in-collision
+           #:find-levels-under-link
            ;; temporal-reasoning
            event make-event timeline timeline-init timeline-advance
            timeline-current-world-state timeline-lookup
-           holds-in-world with-timeline))
+           holds-in-world with-timeline
+           ;; simple-sem-map
+           #:*mesh-path-whitelist*
+           ;; textures
+           #:*static-plane-texture*
+           #:*static-plane-gray-texture*
+           #:*static-plane-gray-thin-texture*
+           #:*static-plane-black-inverted-texture*
+           #:*static-plane-texture-64x64
+	   ;; Query the bullet world
+           get-objects-for-type
+           ))

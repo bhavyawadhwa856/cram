@@ -31,24 +31,33 @@
 (def-fact-group boxy-matching-pms (cpm:matching-process-module
                                    cpm:available-process-module)
 
-  (<- (cpm:matching-process-module ?motion-designator base-pm)
-    (desig:desig-prop ?motion-designator (:type :going)))
-
-  (<- (cpm:matching-process-module ?motion-designator neck-pm)
-    (desig:desig-prop ?motion-designator (:type :looking)))
-
   (<- (cpm:matching-process-module ?motion-designator grippers-pm)
-    (and (or (desig:desig-prop ?motion-designator (:type :gripping))
-             (desig:desig-prop ?motion-designator (:type :opening))
-             (desig:desig-prop ?motion-designator (:type :closing))
-             (desig:desig-prop ?motion-designator (:type :moving-gripper-joint)))
-         (desig:desig-prop ?motion-designator (:gripper ?_))))
+    (or (desig:desig-prop ?motion-designator (:type :gripping))
+        (desig:desig-prop ?motion-designator (:type :opening-gripper))
+        (desig:desig-prop ?motion-designator (:type :closing-gripper))
+        (desig:desig-prop ?motion-designator (:type :moving-gripper-joint))))
 
-  (<- (cpm:matching-process-module ?motion-designator body-pm)
+  (<- (cpm:matching-process-module ?motion-designator giskard:giskard-pm)
     (or (desig:desig-prop ?motion-designator (:type :moving-tcp))
         (desig:desig-prop ?motion-designator (:type :moving-arm-joints))
-        (desig:desig-prop ?motion-designator (:type :wiggling-tcp))))
+        (desig:desig-prop ?motion-designator (:type :pulling))
+        (desig:desig-prop ?motion-designator (:type :pushing))
+        (desig:desig-prop ?motion-designator (:type :wiggling-tcp))
+        (desig:desig-prop ?motion-designator (:type :going))
+        (desig:desig-prop ?motion-designator (:type :moving-torso))
+        (desig:desig-prop ?motion-designator (:type :looking))))
 
   (<- (cpm:available-process-module ?pm)
-    (member ?pm (base-pm neck-pm grippers-pm body-pm))
+    (member ?pm (grippers-pm giskard:giskard-pm))
     (not (cpm:projection-running ?_))))
+
+
+(defmacro with-real-robot (&body body)
+  `(cram-process-modules:with-process-modules-running
+       (rs:robosherlock-perception-pm
+        giskard:giskard-pm
+        joints:joint-state-pm
+        grippers-pm
+        common-desig:wait-pm)
+     (cpl-impl::named-top-level (:name :top-level)
+       ,@body)))

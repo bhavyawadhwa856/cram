@@ -119,9 +119,9 @@
   (let* ((current-position
            (pr2_controllers_msgs-msg:position result))
          ;; TODO: use current-position from joint state message, not result
-         ;; (current-position (car (joint-positions (list cram-tf:*left-gripper-joint*))))
+         ;; (current-position (car (joints:joint-positions (list cram-tf:*left-gripper-joint*))))
          (converged-p
-           (values-converged current-position goal-position convergence-delta)))
+           (cram-tf:values-converged current-position goal-position convergence-delta)))
     (if (eql original-goal-position :grip) ; gripper should not completely close
         (when converged-p
           (cpl:fail 'common-fail:gripper-closed-completely
@@ -167,9 +167,13 @@ goal: ~a, current: ~a, delta: ~a." goal-position current-position convergence-de
                           (make-gripper-action-goal action-client goal-position max-effort)
                           :timeout action-timeout))))
                (ensure-gripper-goal-reached result status position goal-position delta)
-               (values result status))))
-      (if (and left-or-right (listp left-or-right))
-          (cpl:par
-            (move-the-hand-yo (first left-or-right))
-            (move-the-hand-yo (second left-or-right)))
+               (values result status)
+               ;; return the joint state, which is our observation
+               (joints:full-joint-states-as-hash-table))))
+        (if (listp left-or-right)
+            (if (= (length left-or-right) 2) 
+                (cpl:par
+                  (move-the-hand-yo (first left-or-right))
+                  (move-the-hand-yo (second left-or-right)))
+                (move-the-hand-yo (first left-or-right)))
           (move-the-hand-yo left-or-right)))))

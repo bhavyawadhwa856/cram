@@ -1,14 +1,14 @@
 (defsystem cram-sim-log-generator
-  :depends-on (cram-language
+  :depends-on (:cram-language
                :cram-designators
                :cl-transforms
                :cl-transforms-stamped
                :cram-json-prolog
                :roslisp
                :cram-pr2-pick-place-demo
+               :cram-urdf-projection
                :cram-cloud-logger
-               cram-utilities
-               )
+               :cram-utilities)
   :components
   ((:module "src"
     :components

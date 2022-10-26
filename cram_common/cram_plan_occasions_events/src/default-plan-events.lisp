@@ -28,8 +28,10 @@
 
 (in-package :cram-plan-occasions-events)
 
-;;; Note that we do not provide an event for object change. The reason
+;;; Note that we do not provide an event for object pose change. The reason
 ;;; is that object changes are essentially object perception events.
+;;; We do, however, provide an object location change, as location change
+;;; can be asserted using the knowledge from successful plan execution.
 (defclass object-perceived-event (event)
   ((object-designator
     :initarg :object-designator :reader event-object-designator
@@ -47,14 +49,21 @@
   contains a symbol indicating the sensor that produces the
   perception."))
 
-;; NOTE(winkler): This contradicts the above notice; will be resolved
-;; later after everything got cleaned up, as this is a conceptual
-;; issue, not a code-one.
-(defclass object-updated-event (object-perceived-event) ())
-
-(defclass object-removed-event (event)
-  ((object-name :initarg :object-name :reader event-object-name
-                :initform :object-name)))
+(defclass object-location-changed (event)
+  ((object-designator
+    :initarg :object-designator :reader event-object-designator
+    :initform (error
+               'simple-error
+               :format-control "OBJECT-LOCATION-CHANGED requires an object."))
+   (location-designator
+    :initarg :location-designator :reader event-location-designator
+    :initform (error
+               'simple-error
+               :format-control "OBJECT-LOCATION-CHANGED requires a location.")))
+  (:documentation "Event that is generated whenever an object general location
+  is changed. The slot `object-designator' contains a reference to the
+  designator describing the perceived object and the slot `location-designator'
+  contains the new location designator, where the object is expected to have moved."))
 
 (defclass robot-state-changed (event)
   ()
@@ -63,50 +72,65 @@
 
 (defclass object-connection-event (event)
   ((object-name
-    :initarg :object-name :reader event-object-name
+    :initarg :object-name
+    :reader event-object-name
     :initform (error
                'simple-error
-               :format-control "OBJECT-CONNECTION-EVENT requires an object."))
-   (arm
-    :initarg :arm :reader event-arm
+               :format-control "OBJECT-CONNECTION-EVENT requires an object.")))
+  (:documentation "Base class for all events that indicate that a change occurred in a
+  physical connection between an object and another object or the robot."))
+
+(defclass object-attached-robot (object-connection-event)
+  ((arm
+    :initarg :arm
+    :reader event-arm
+    :initform nil)
+   (link
+    :initarg :link
+    :reader event-link
+    :initform nil)
+   (grasp
+    :initarg :grasp
+    :reader event-grasp
+    :initform nil)
+   (not-loose
+    :initarg :not-loose
+    :reader event-not-loose
+    :initform nil)
+   (other-object-name
+    :initarg :other-object-name
+    :reader event-other-object-name
+    :initform nil)
+   (object-designator
+    :initarg :object-designator
+    :reader event-object-designator
+    :initform nil)))
+
+(defclass object-detached-robot (object-connection-event)
+  ((arm
+    :initarg :arm
+    :reader event-arm
+    :initform nil)
+   (link
+    :initarg :link
+    :reader event-link
+    :initform nil)))
+
+(defclass object-attached-object (object-connection-event)
+  ((other-object-name
+    :initarg :other-object-name
+    :reader event-other-object-name
     :initform (error
                'simple-error
-               :format-control "OBJECT-CONNECTION-EVENT requires an arm.")))
-  (:documentation "Base class for all events that indicate that a
-  physical connection between an object and the robot changed."))
-
-;; (defclass object-connection-event (event)
-;;   ((object
-;;     :initarg :object :reader event-object
-;;     :initform (error
-;;                'simple-error
-;;                :format-control "OBJECT-CONNECTION-EVENT requires an object."))
-;;    (link
-;;     :initarg :link :reader event-link
-;;     :initform (error
-;;                'simple-error
-;;                :format-control "OBJECT-CONNECTION-EVENT requires a link."))
-;;    (side
-;;     :initarg :side :reader event-side
-;;     :initform nil))
-;;   (:documentation "Base class for all events that indicate that a
-;;   physical connection between an object and the robot changed."))
-
-(defclass object-attached (object-connection-event) ())
-
-(defclass object-detached (object-connection-event) ())
-
-(defclass object-articulation-event (event)
-  ((object-designator
-    :initarg :object-designator :reader event-object-designator
+               :format-control "OBJECT-ATTACHED-OBJECT event requires OTHER-OBJECT-NAME."))
+   (attachment-type
+    :initarg :attachment-type
+    :reader event-attachment-type
     :initform (error
                'simple-error
-               :format-control "OBJECT-ARTICULATION-EVENT requires an object."))
-   (opening-distance
-    :initarg :opening-distance :reader opening-distance
-    :initform  (error
-                'simple-error
-                :format-control "OBJECT-ARTICULATION-EVENT requires an opening distance."))))
+               :format-control "OBJECT-ATTACHED-OBJECT event requires ATTACHMENT-TYPE."))))
+
+(defclass object-detached-object (object-connection-event) ())
 
 (defclass environment-manipulation-event (event)
   ((joint-name
@@ -139,29 +163,3 @@
 (defclass container-opening-event (environment-manipulation-event) ())
 
 (defclass container-closing-event (environment-manipulation-event) ())
-
-;; (defclass object-gripped (cram-occasions-events:event)
-;;   ((arm :initarg :arm
-;;         :reader event-arm
-;;         :initform (error 'simple-error
-;;                          :format-control "OBJECT-GRIPPED event requires ARM."))
-;;    (object :initarg :object
-;;            :reader event-object
-;;            :initform (error 'simple-error
-;;                             :format-control "OBJECT-GRIPPED event requires OBJECT."))
-;;    (grasp :initarg :grasp
-;;           :reader event-grasp
-;;           :initform (error 'simple-error
-;;                            :format-control "OBJECT-GRIPPED event requires GRASP.")))
-;;   (:documentation "Event that is generated whenever the robot successfully
-;; closed a gripper around an object."))
-
-;; (defclass object-released (cram-occasions-events:event)
-;;   ((arm :initarg :arm
-;;         :reader event-arm
-;;         :initform (error 'simple-error
-;;                          :format-control "OBJECT-GRIPPED event requires OBJECT."))
-;;    (object :initarg :object ; maybe some epic robots can release only one of two objects they hold
-;;            :reader event-object
-;;            :initform (error 'simple-error
-;;                             :format-control "OBJECT-GRIPPED event requires OBJECT."))))
