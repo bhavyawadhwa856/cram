@@ -81,5 +81,4 @@ jobs:
           source devel/setup.bash
           export DISPLAY=:99.0
           sh -e /etc/init.d/xvfb start
-#          export DISPLAY=:0 xvfb-run -s '-screen 0 1024x768x24'
           rosrun cram_tests test.sh
