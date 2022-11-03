@@ -76,6 +76,9 @@ jobs:
           source /opt/ros/$ROS_DISTRO/setup.bash
           catkin build $ROS_PARALLEL_JOBS
       - name: Run Tests
+        before_install:
+         - "export DISPLAY=:99.0"
+         - "sh -e /etc/init.d/xvfb start"
         run: |
           cd $GITHUB_WORKSPACE/ros_ws/
           source devel/setup.bash
