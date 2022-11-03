@@ -82,5 +82,5 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/ros_ws/
           source devel/setup.bash
-          #export DISPLAY=:0 xvfb-run -s '-screen 0 1024x768x24'
+#          export DISPLAY=:0 xvfb-run -s '-screen 0 1024x768x24'
           rosrun cram_tests test.sh
