@@ -9,6 +9,7 @@ on:
 #       - popcorn-noetic
   
 jobs:
+  
   build:
     runs-on: ubuntu-20.04
     env:
@@ -77,6 +78,8 @@ jobs:
           catkin build $ROS_PARALLEL_JOBS
       - name: Run Tests
         run: |
+          echo "Github CI/CD | Print all environment variables"
+          env 
           cd $GITHUB_WORKSPACE/ros_ws/
           source devel/setup.bash
           sudo apt-get install -y mesa-utils xvfb
